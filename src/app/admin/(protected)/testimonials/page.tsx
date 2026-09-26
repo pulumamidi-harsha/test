@@ -1,22 +1,60 @@
+import { readFile } from "fs/promises";
+import path from "path";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { DeleteTestimonialButton } from "@/components/admin/DeleteTestimonialButton";
+import { SupabaseSetupBanner } from "@/components/admin/SupabaseSetupBanner";
 import { TestimonialsVisibleCountForm } from "@/components/admin/TestimonialsVisibleCountForm";
+import { cmsPath } from "@/lib/cms/admin-path";
 import { fallbackTestimonials } from "@/lib/testimonials/fallback";
 import { getAllTestimonialsAdmin } from "@/lib/testimonials/queries";
 import { getTestimonialsVisibleCount } from "@/lib/settings/testimonials-limit.server";
 import { getSupabaseEnv } from "@/lib/supabase/env";
+import { getTestimonialsSchemaStatus } from "@/lib/supabase/schema";
 
 export default async function TestimonialsAdminPage() {
   const configured = getSupabaseEnv().isConfigured;
   const visibleCount = await getTestimonialsVisibleCount();
+  const schema = await getTestimonialsSchemaStatus();
+  const schemaReady = schema.ok;
   let items = fallbackTestimonials;
+  let usingFallback = !configured || !schemaReady;
 
-  if (configured) {
+  if (configured && schemaReady) {
     try {
       items = await getAllTestimonialsAdmin();
+      usingFallback = false;
     } catch {
       items = fallbackTestimonials;
+      usingFallback = true;
+    }
+  }
+
+  let setupSql = "";
+  let bannerVariant: "missing_tables" | "permission_denied" | null = null;
+  const projectRef =
+    getSupabaseEnv().url?.match(/^https?:\/\/([^.]+)\.supabase\.co/)?.[1] ??
+    null;
+  if (!schemaReady && schema.reason === "missing_tables") {
+    bannerVariant = "missing_tables";
+    try {
+      setupSql = await readFile(
+        path.join(process.cwd(), "supabase/setup.sql"),
+        "utf8",
+      );
+    } catch {
+      setupSql = "-- Could not load supabase/setup.sql from the project root.";
+    }
+  } else if (!schemaReady && schema.reason === "permission_denied") {
+    bannerVariant = "permission_denied";
+    try {
+      setupSql = await readFile(
+        path.join(process.cwd(), "supabase/fix_grants.sql"),
+        "utf8",
+      );
+    } catch {
+      setupSql =
+        "-- Could not load supabase/fix_grants.sql from the project root.";
     }
   }
 
@@ -30,7 +68,7 @@ export default async function TestimonialsAdminPage() {
           </p>
         </div>
         <Link
-          href="/admin/testimonials/new"
+          href={cmsPath("testimonials", "new")}
           className="inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover"
         >
           <Plus className="h-4 w-4" />
@@ -38,11 +76,38 @@ export default async function TestimonialsAdminPage() {
         </Link>
       </div>
 
-      <TestimonialsVisibleCountForm initialCount={visibleCount} />
+      {setupSql && bannerVariant ? (
+        <SupabaseSetupBanner
+          sql={setupSql}
+          detail={"detail" in schema ? schema.detail : undefined}
+          projectRef={projectRef}
+          variant={bannerVariant}
+        />
+      ) : null}
+
+      <TestimonialsVisibleCountForm
+        initialCount={visibleCount}
+        schemaReady={schemaReady}
+        schemaBlockedReason={
+          !schema.ok
+            ? schema.reason === "permission_denied"
+              ? "permission_denied"
+              : schema.reason === "missing_tables"
+                ? "missing_tables"
+                : "unknown"
+            : null
+        }
+      />
 
       {!configured ? (
         <p className="rounded-xl border border-accent/30 bg-accent-soft px-4 py-3 text-sm">
           Showing local fallback data until Supabase is connected.
+        </p>
+      ) : null}
+
+      {configured && usingFallback && schemaReady ? (
+        <p className="rounded-xl border border-accent/30 bg-accent-soft px-4 py-3 text-sm">
+          Could not load testimonials from Supabase — showing local fallback data.
         </p>
       ) : null}
 
@@ -103,12 +168,14 @@ export default async function TestimonialsAdminPage() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <Link
-                        href={`/admin/testimonials/${item.id}`}
+                        href={cmsPath("testimonials", item.id)}
                         className="rounded-full border border-border px-3 py-1 text-xs font-semibold hover:bg-primary-soft"
                       >
                         Edit
                       </Link>
-                      {configured ? <DeleteTestimonialButton id={item.id} /> : null}
+                      {configured && schemaReady ? (
+                        <DeleteTestimonialButton id={item.id} />
+                      ) : null}
                     </div>
                   </td>
                 </tr>

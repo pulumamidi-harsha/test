@@ -156,8 +156,36 @@ select * from (values
   )
 ) as seed(quote, name, role, company, product, tone, sort_order)
 where not exists (select 1 from public.testimonials limit 1);
+-- Site settings (e.g. how many testimonials to show on the homepage)
 
+create table if not exists public.site_settings (
+  key text primary key,
+  value text not null,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.site_settings enable row level security;
+
+drop policy if exists "Public read site settings" on public.site_settings;
+create policy "Public read site settings"
+  on public.site_settings for select
+  to anon, authenticated
+  using (true);
+
+drop policy if exists "Auth manage site settings" on public.site_settings;
+create policy "Auth manage site settings"
+  on public.site_settings for all
+  to authenticated
+  using (true)
+  with check (true);
+
+insert into public.site_settings (key, value)
+values ('testimonials_visible_count', '8')
+on conflict (key) do nothing;
+
+-- API roles need table privileges (some projects revoke default grants)
 grant usage on schema public to anon, authenticated, service_role;
 grant select, insert, update, delete on table public.testimonials to anon, authenticated, service_role;
+grant select, insert, update, delete on table public.site_settings to anon, authenticated, service_role;
 grant select, insert, update, delete on table public.page_views_daily to anon, authenticated, service_role;
 grant usage, select on all sequences in schema public to anon, authenticated, service_role;

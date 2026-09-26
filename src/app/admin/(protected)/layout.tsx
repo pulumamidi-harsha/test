@@ -1,9 +1,11 @@
-import { redirect } from "next/navigation";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { cmsPath } from "@/lib/cms/admin-path";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
 
-export default async function AdminLayout({
+/** Auth gate + shared admin chrome for all /admin protected routes. */
+export default async function AdminProtectedLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -17,15 +19,16 @@ export default async function AdminLayout({
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!user) redirect("/admin/login");
-      email = user.email ?? null;
+      if (!user) redirect(cmsPath("login"));
 
-      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      const { data: aal } =
+        await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
       if (aal?.nextLevel === "aal2" && aal.currentLevel !== "aal2") {
-        redirect("/admin/login?next=/admin");
+        redirect(`${cmsPath("login")}?next=${encodeURIComponent(cmsPath())}`);
       }
+      email = user.email ?? null;
     } catch {
-      redirect("/admin/login");
+      redirect(cmsPath("login"));
     }
   }
 

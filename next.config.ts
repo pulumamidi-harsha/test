@@ -1,9 +1,9 @@
 import type { NextConfig } from "next";
 
 function cmsAdminBase() {
-  const raw = process.env.NEXT_PUBLIC_CMS_ADMIN_BASE?.trim() || "/cms";
+  const raw = process.env.NEXT_PUBLIC_CMS_ADMIN_BASE?.trim() || "/admin";
   const base = raw.startsWith("/") ? raw : `/${raw}`;
-  return base.replace(/\/$/, "") || "/cms";
+  return base.replace(/\/$/, "") || "/admin";
 }
 
 const cmsBase = cmsAdminBase();
@@ -34,11 +34,19 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  async rewrites() {
-    if (cmsBase === "/cms") return [];
+  async redirects() {
     return [
-      { source: cmsBase, destination: "/cms" },
-      { source: `${cmsBase}/:path*`, destination: "/cms/:path*" },
+      { source: "/cms", destination: "/admin", permanent: false },
+      { source: "/cms/:path*", destination: "/admin/:path*", permanent: false },
+      { source: "/arun", destination: "/admin", permanent: false },
+      { source: "/arun/:path*", destination: "/admin/:path*", permanent: false },
+    ];
+  },
+  async rewrites() {
+    if (cmsBase === "/admin") return [];
+    return [
+      { source: cmsBase, destination: "/admin" },
+      { source: `${cmsBase}/:path*`, destination: "/admin/:path*" },
     ];
   },
   async headers() {

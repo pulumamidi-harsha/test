@@ -15,7 +15,6 @@ import { Accordion } from "@/components/ui/Accordion";
 import { NewsCarousel } from "@/components/sections/NewsCarousel";
 import { HomeCaseStudies } from "@/components/sections/HomeCaseStudies";
 import { IndustryShowcase } from "@/components/sections/IndustryShowcase";
-import { WhyChooseShowcase } from "@/components/sections/WhyChooseShowcase";
 import { TestimonialsDeck } from "@/components/sections/TestimonialsDeck";
 import { GlowStrokeCard } from "@/components/v2/GlowStrokeCard";
 import { packages, addOns } from "@/config/pricing";
@@ -62,7 +61,6 @@ export function V2HomePage({
       <HomeCaseStudies />
       <Amc />
       <Pricing />
-      <WhyChooseShowcase />
       <TestimonialsDeck items={testimonials} />
       <NewsCarousel items={news} />
       <Faq />

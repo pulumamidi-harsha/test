@@ -2,29 +2,38 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 import {
   MAX_TESTIMONIALS_VISIBLE,
   MIN_TESTIMONIALS_VISIBLE,
-  SETTINGS_KEY_VISIBLE,
   clampVisibleCount,
 } from "@/lib/settings/testimonials-limit";
+import { saveTestimonialsVisibleCount } from "@/lib/settings/testimonials-limit.actions";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 
 export function TestimonialsVisibleCountForm({
   initialCount,
+  schemaReady = true,
+  schemaBlockedReason = null,
 }: {
   initialCount: number;
+  schemaReady?: boolean;
+  schemaBlockedReason?:
+    | "missing_tables"
+    | "permission_denied"
+    | "unknown"
+    | null;
 }) {
   const router = useRouter();
   const [count, setCount] = useState(initialCount);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [isError, setIsError] = useState(false);
   const configured = getSupabaseEnv().isConfigured;
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setMessage(null);
+    setIsError(false);
     const next = clampVisibleCount(count);
     setCount(next);
 
@@ -35,18 +44,31 @@ export function TestimonialsVisibleCountForm({
       return;
     }
 
+    if (!schemaReady) {
+      setIsError(true);
+      setMessage(
+        schemaBlockedReason === "permission_denied"
+          ? "Tables exist, but API access is blocked. Run the grants SQL shown above, then refresh."
+          : schemaBlockedReason === "missing_tables"
+            ? "Database tables are missing. Run the setup SQL shown above, then try again."
+            : "Database is not ready for saves yet. Check the notice above, then refresh.",
+      );
+      return;
+    }
+
     setSaving(true);
     try {
-      const supabase = createClient();
-      const { error } = await supabase.from("site_settings").upsert({
-        key: SETTINGS_KEY_VISIBLE,
-        value: String(next),
-        updated_at: new Date().toISOString(),
-      });
-      if (error) throw error;
-      setMessage(`Showing ${next} cards on the site.`);
+      const result = await saveTestimonialsVisibleCount(next);
+      if (!result.ok) {
+        setIsError(true);
+        setMessage(result.error);
+        return;
+      }
+      setCount(result.count);
+      setMessage(`Showing ${result.count} cards on the site.`);
       router.refresh();
     } catch (err) {
+      setIsError(true);
       setMessage(err instanceof Error ? err.message : "Could not save");
     } finally {
       setSaving(false);
@@ -70,14 +92,20 @@ export function TestimonialsVisibleCountForm({
       <div className="mt-4 flex flex-wrap items-end gap-3">
         <label className="block text-sm">
           <span className="mb-1.5 block font-medium">Visible count</span>
-          <input
-            type="number"
-            min={MIN_TESTIMONIALS_VISIBLE}
-            max={MAX_TESTIMONIALS_VISIBLE}
+          <select
             value={count}
-            onChange={(e) => setCount(Number(e.target.value) || 0)}
-            className="w-28 rounded-xl border border-border bg-bg px-3 py-2.5 outline-none focus:border-primary"
-          />
+            onChange={(e) => setCount(Number(e.target.value))}
+            className="w-36 rounded-xl border border-border bg-bg px-3 py-2.5 outline-none focus:border-primary"
+          >
+            {Array.from(
+              { length: MAX_TESTIMONIALS_VISIBLE - MIN_TESTIMONIALS_VISIBLE + 1 },
+              (_, i) => MIN_TESTIMONIALS_VISIBLE + i,
+            ).map((n) => (
+              <option key={n} value={n}>
+                {n} cards
+              </option>
+            ))}
+          </select>
         </label>
         <button
           type="submit"
@@ -87,10 +115,17 @@ export function TestimonialsVisibleCountForm({
           {saving ? "Saving…" : "Save"}
         </button>
       </div>
-      <p className="mt-2 text-xs text-muted">
-        Allowed range: {MIN_TESTIMONIALS_VISIBLE}–{MAX_TESTIMONIALS_VISIBLE}
-      </p>
-      {message ? <p className="mt-3 text-sm text-primary">{message}</p> : null}
+      {message ? (
+        <p
+          className={
+            isError
+              ? "mt-3 text-sm text-red-300"
+              : "mt-3 text-sm text-primary"
+          }
+        >
+          {message}
+        </p>
+      ) : null}
     </form>
   );
 }

@@ -51,23 +51,29 @@ NEXT_PUBLIC_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
-# News CMS panel (default URL /cms — change with NEXT_PUBLIC_CMS_ADMIN_BASE)
-NEXT_PUBLIC_CMS_ADMIN_BASE=/cms
+# Admin panel URL (default /admin)
+NEXT_PUBLIC_CMS_ADMIN_BASE=/admin
 CONTENTFUL_NEWS_SPACE_ID=
 CONTENTFUL_NEWS_DELIVERY_TOKEN=
 CONTENTFUL_NEWS_ENVIRONMENT=master
 CONTENTFUL_NEWS_MANAGEMENT_TOKEN=
 N8N_WEBHOOK_URL=
+
+# Google Analytics 4 (optional)
+NEXT_PUBLIC_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 ```
 
-- **`/admin`** — testimonials (Supabase).
-- **`/cms`** (or your `NEXT_PUBLIC_CMS_ADMIN_BASE`) — Arun-style news Command Center (Contentful Management + n8n). Management token never ships to the browser.
+- **`/admin`** — news CMS (Contentful + n8n) + testimonials (Supabase). Unauthenticated visitors are sent to `/admin/login`; signed-in users land on the dashboard.
+- Set `NEXT_PUBLIC_GA_MEASUREMENT_ID` in `.env.local` / host env to enable GA4 on the public site.
 
 ## 3. Run the database migrations
-In Supabase **SQL Editor**, run in order:
+In Supabase **SQL Editor**, run **`supabase/setup.sql`** once (or the two files below in order).
 
-1. `supabase/migrations/001_testimonials_and_analytics.sql`
-2. `supabase/migrations/002_site_settings.sql`
+Until these tables exist (and API roles have grants), admin saves fail — the Testimonials page shows a setup banner with a copy button.
+
+1. Prefer `supabase/setup.sql` (tables + grants)
+2. If tables already exist but saves still fail with **permission denied**, run `supabase/fix_grants.sql`
+3. Or run in order: `001_…sql` then `002_…sql`
 
 This creates:
 - `testimonials` table (+ RLS)

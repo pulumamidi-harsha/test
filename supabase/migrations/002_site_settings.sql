@@ -24,3 +24,6 @@ create policy "Auth manage site settings"
 insert into public.site_settings (key, value)
 values ('testimonials_visible_count', '8')
 on conflict (key) do nothing;
+
+grant usage on schema public to anon, authenticated, service_role;
+grant select, insert, update, delete on table public.site_settings to anon, authenticated, service_role;

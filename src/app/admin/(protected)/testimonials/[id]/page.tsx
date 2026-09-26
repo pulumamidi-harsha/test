@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { TestimonialForm } from "@/components/admin/TestimonialForm";
+import { cmsPath } from "@/lib/cms/admin-path";
 import { getSupabaseEnv } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 import { fallbackTestimonials, mapTestimonialRow } from "@/lib/testimonials/fallback";
@@ -36,7 +37,7 @@ export default async function EditTestimonialPage({
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/admin/testimonials" className="text-sm text-muted hover:text-primary">
+        <Link href={cmsPath("testimonials")} className="text-sm text-muted hover:text-primary">
           ← Back to testimonials
         </Link>
         <h2 className="mt-2 font-heading text-2xl font-bold">Edit testimonial</h2>

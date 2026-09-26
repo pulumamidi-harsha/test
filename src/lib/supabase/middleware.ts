@@ -45,33 +45,10 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isAdmin = path.startsWith("/admin");
-  const isLogin = path.startsWith("/admin/login");
-  const isAuthCallback = path.startsWith("/admin/auth");
-  const isCms = isCmsAdminPath(path);
-  const isCmsLogin = isCmsLoginPath(path);
+  const isAdminArea = isCmsAdminPath(path);
+  const isLogin = isCmsLoginPath(path);
 
-  if (isAdmin && !isLogin && !isAuthCallback && !user) {
-    const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/admin/login";
-    redirectUrl.searchParams.set("next", path);
-    const redirect = NextResponse.redirect(redirectUrl);
-    redirect.headers.set("x-pathname", path);
-    return redirect;
-  }
-
-  if (isLogin && user) {
-    const { data: aal } =
-      await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-    if (aal?.currentLevel === "aal2" || aal?.nextLevel !== "aal2") {
-      const redirectUrl = request.nextUrl.clone();
-      redirectUrl.pathname = "/admin";
-      redirectUrl.search = "";
-      return NextResponse.redirect(redirectUrl);
-    }
-  }
-
-  if (isCms && !isCmsLogin && !user) {
+  if (isAdminArea && !isLogin && !user) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = `${getCmsAdminBase()}/login`;
     redirectUrl.searchParams.set("next", path);
@@ -80,7 +57,7 @@ export async function updateSession(request: NextRequest) {
     return redirect;
   }
 
-  if (isCmsLogin && user) {
+  if (isLogin && user) {
     const { data: aal } =
       await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
     if (aal?.currentLevel === "aal2" || aal?.nextLevel !== "aal2") {

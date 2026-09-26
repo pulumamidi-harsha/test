@@ -28,7 +28,6 @@ import {
   CmsImageUploader,
   useAssetUrl,
 } from "@/components/cms/CmsImageUploader";
-import { CmsUserMenu } from "@/components/cms/CmsUserMenu";
 import "react-quill-new/dist/quill.snow.css";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
@@ -372,14 +371,14 @@ export function CmsReviewClient({ entryId }: Props) {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-black">
+      <div className="flex min-h-[40vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen bg-black pb-20 text-white">
+    <div className="relative pb-12 text-white">
       {mediaOpen ? (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-6 backdrop-blur-sm">
           <div className="flex h-[80vh] w-full max-w-5xl flex-col rounded-[12px] border border-border bg-surface shadow-2xl">
@@ -474,81 +473,76 @@ export function CmsReviewClient({ entryId }: Props) {
         </div>
       ) : null}
 
-      <div className="sticky top-0 z-40 border-b border-border bg-surface/80 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-[1600px] items-center justify-between gap-3 px-4 sm:px-6">
-          <div className="flex min-w-0 flex-1 items-center gap-3">
-            <Link
-              href={cmsPath()}
-              className="shrink-0 rounded-lg p-2 text-muted hover:bg-black hover:text-white"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
-            {isEditingTitle ? (
-              <input
-                ref={titleInputRef}
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                onBlur={() => setIsEditingTitle(false)}
-                onKeyDown={(e) =>
-                  e.key === "Enter" && setIsEditingTitle(false)
-                }
-                className="h-9 w-full max-w-2xl rounded-[10px] border border-border bg-black px-3 text-lg font-bold text-white"
-              />
-            ) : (
-              <button
-                type="button"
-                onClick={() => setIsEditingTitle(true)}
-                className="truncate rounded-md px-2 py-1 text-left text-lg font-bold hover:bg-black/50"
-              >
-                {title || "Untitled Post"}
-              </button>
-            )}
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            {!isPublished ? (
-              <>
-                <button
-                  type="button"
-                  disabled={isProcessing || isDiscarding}
-                  onClick={() => setConfirmDiscard(true)}
-                  className="hidden items-center rounded-[10px] px-3 py-2 text-sm text-red-400 hover:bg-red-950/40 sm:inline-flex"
-                >
-                  <Trash2 className="mr-2 h-4 w-4" /> Discard
-                </button>
-                <button
-                  type="button"
-                  disabled={isProcessing || isDiscarding}
-                  onClick={() => void saveEntry(false)}
-                  className="inline-flex items-center rounded-[10px] border border-border bg-black px-3 py-2 text-sm text-white hover:border-primary/40"
-                >
-                  {isProcessing ? (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  ) : (
-                    <Save className="mr-2 h-4 w-4" />
-                  )}
-                  Save Draft
-                </button>
-              </>
-            ) : null}
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-border bg-surface/80 px-3 py-3 sm:px-4">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <Link
+            href={cmsPath()}
+            className="shrink-0 rounded-lg p-2 text-muted hover:bg-black hover:text-white"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+          {isEditingTitle ? (
+            <input
+              ref={titleInputRef}
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onBlur={() => setIsEditingTitle(false)}
+              onKeyDown={(e) => e.key === "Enter" && setIsEditingTitle(false)}
+              className="h-9 w-full max-w-2xl rounded-[10px] border border-border bg-black px-3 text-lg font-bold text-white"
+            />
+          ) : (
             <button
               type="button"
-              disabled={isProcessing || isDiscarding}
-              onClick={() => void saveEntry(true)}
-              className="inline-flex items-center rounded-[10px] bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-hover"
+              onClick={() => setIsEditingTitle(true)}
+              className="truncate rounded-md px-2 py-1 text-left text-lg font-bold hover:bg-black/50"
             >
-              {isProcessing ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="mr-2 h-4 w-4" />
-              )}
-              Publish
+              {title || "Untitled Post"}
             </button>
-            <CmsUserMenu />
-          </div>
+          )}
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          {!isPublished ? (
+            <>
+              <button
+                type="button"
+                disabled={isProcessing || isDiscarding}
+                onClick={() => setConfirmDiscard(true)}
+                className="hidden items-center rounded-[10px] px-3 py-2 text-sm text-red-400 hover:bg-red-950/40 sm:inline-flex"
+              >
+                <Trash2 className="mr-2 h-4 w-4" /> Discard
+              </button>
+              <button
+                type="button"
+                disabled={isProcessing || isDiscarding}
+                onClick={() => void saveEntry(false)}
+                className="inline-flex items-center rounded-[10px] border border-border bg-black px-3 py-2 text-sm text-white hover:border-primary/40"
+              >
+                {isProcessing ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="mr-2 h-4 w-4" />
+                )}
+                Save Draft
+              </button>
+            </>
+          ) : null}
+          <button
+            type="button"
+            disabled={isProcessing || isDiscarding}
+            onClick={() => void saveEntry(true)}
+            className="inline-flex items-center rounded-[10px] bg-primary px-3 py-2 text-sm font-medium text-white hover:bg-primary-hover"
+          >
+            {isProcessing ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="mr-2 h-4 w-4" />
+            )}
+            Publish
+          </button>
         </div>
       </div>
 
-      <div className="mx-auto max-w-[1600px] px-4 py-8 sm:px-6">
+      <div>
         {banner ? (
           <p
             className={`mb-6 rounded-lg border px-3 py-2 text-sm ${

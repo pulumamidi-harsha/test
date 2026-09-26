@@ -4,9 +4,6 @@ import { FormEvent, useEffect, useState } from "react";
 import { Loader2, Lock, Mail } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { getSupabaseEnv } from "@/lib/supabase/env";
-import { CmsUserMenu } from "@/components/cms/CmsUserMenu";
-import { cmsPath } from "@/lib/cms/admin-path";
-import Link from "next/link";
 
 export function CmsSettingsClient() {
   const configured = getSupabaseEnv().isConfigured;
@@ -129,20 +126,7 @@ export function CmsSettingsClient() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="border-b border-border bg-surface/80 backdrop-blur-md">
-        <div className="mx-auto flex h-14 max-w-3xl items-center justify-between px-6">
-          <Link
-            href={cmsPath()}
-            className="text-sm text-muted transition hover:text-white"
-          >
-            ← Command Center
-          </Link>
-          <CmsUserMenu />
-        </div>
-      </div>
-
-      <div className="mx-auto max-w-3xl space-y-8 p-6 sm:p-8">
+    <div className="mx-auto max-w-3xl space-y-8">
         <h1 className="font-heading text-3xl">Account Settings</h1>
 
         {message ? (
@@ -257,7 +241,6 @@ export function CmsSettingsClient() {
             </button>
           </form>
         </section>
-      </div>
     </div>
   );
 }

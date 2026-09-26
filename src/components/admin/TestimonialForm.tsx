@@ -2,7 +2,10 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AvatarCropDialog } from "@/components/admin/AvatarCropDialog";
 import { createClient } from "@/lib/supabase/client";
+import { cmsPath } from "@/lib/cms/admin-path";
+import { formatSupabaseWriteError } from "@/lib/supabase/errors";
 import type { Testimonial } from "@/types/testimonial";
 import { cn } from "@/lib/utils";
 
@@ -19,26 +22,44 @@ export function TestimonialForm({ initial }: Props) {
   const [product, setProduct] = useState(initial?.product ?? "");
   const [sortOrder, setSortOrder] = useState(initial?.sortOrder ?? 0);
   const [isPublished, setIsPublished] = useState(initial?.isPublished ?? true);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(initial?.avatarUrl ?? null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(
+    initial?.avatarUrl ?? null,
+  );
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function onUpload(file: File) {
+  function onPickFile(file: File) {
+    setError(null);
+    const url = URL.createObjectURL(file);
+    setCropSrc(url);
+  }
+
+  function closeCrop() {
+    if (cropSrc) URL.revokeObjectURL(cropSrc);
+    setCropSrc(null);
+  }
+
+  async function uploadCropped(file: File) {
     setUploading(true);
     setError(null);
     try {
       const supabase = createClient();
-      const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-      const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
       const { error: uploadError } = await supabase.storage
         .from("testimonial-avatars")
-        .upload(path, file, { upsert: false, contentType: file.type });
+        .upload(path, file, { upsert: false, contentType: "image/jpeg" });
       if (uploadError) throw uploadError;
-      const { data } = supabase.storage.from("testimonial-avatars").getPublicUrl(path);
+      const { data } = supabase.storage
+        .from("testimonial-avatars")
+        .getPublicUrl(path);
       setAvatarUrl(data.publicUrl);
+      closeCrop();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload failed");
+      const message = formatSupabaseWriteError(err, "Upload failed");
+      setError(message);
+      throw new Error(message);
     } finally {
       setUploading(false);
     }
@@ -68,28 +89,39 @@ export function TestimonialForm({ initial }: Props) {
           .eq("id", initial.id);
         if (updateError) throw updateError;
       } else {
-        const { error: insertError } = await supabase.from("testimonials").insert(payload);
+        const { error: insertError } = await supabase
+          .from("testimonials")
+          .insert(payload);
         if (insertError) throw insertError;
       }
 
-      router.push("/admin/testimonials");
+      router.push(cmsPath("testimonials"));
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Save failed");
+      setError(formatSupabaseWriteError(err, "Save failed"));
     } finally {
       setSaving(false);
     }
   }
 
-  const initials = name
-    .split(" ")
-    .map((p) => p[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase() || "?";
+  const initials =
+    name
+      .split(" ")
+      .map((p) => p[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "?";
 
   return (
     <form onSubmit={onSubmit} className="mx-auto max-w-3xl space-y-6">
+      {cropSrc ? (
+        <AvatarCropDialog
+          imageSrc={cropSrc}
+          onCancel={closeCrop}
+          onConfirm={uploadCropped}
+        />
+      ) : null}
+
       {error ? (
         <p className="rounded-xl border border-coral/30 bg-coral/10 px-3 py-2 text-sm text-coral">
           {error}
@@ -163,12 +195,16 @@ export function TestimonialForm({ initial }: Props) {
       <div className="rounded-2xl border border-border bg-bg p-4">
         <p className="text-sm font-medium">Profile picture</p>
         <p className="mt-1 text-xs text-muted">
-          Optional. If empty, initials from the name are shown on the site.
+          Optional. You can crop after selecting. Initials show when empty.
         </p>
         <div className="mt-4 flex items-center gap-4">
           {avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={avatarUrl} alt="" className="h-14 w-14 rounded-full object-cover" />
+            <img
+              src={avatarUrl}
+              alt=""
+              className="h-14 w-14 rounded-full object-cover"
+            />
           ) : (
             <span className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
               {initials}
@@ -184,7 +220,8 @@ export function TestimonialForm({ initial }: Props) {
                 disabled={uploading}
                 onChange={(e) => {
                   const file = e.target.files?.[0];
-                  if (file) void onUpload(file);
+                  e.target.value = "";
+                  if (file) onPickFile(file);
                 }}
               />
             </label>
@@ -214,16 +251,20 @@ export function TestimonialForm({ initial }: Props) {
       <div className="flex flex-wrap gap-3">
         <button
           type="submit"
-          disabled={saving || uploading}
+          disabled={saving || uploading || !!cropSrc}
           className={cn(
             "rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover disabled:opacity-60",
           )}
         >
-          {saving ? "Saving…" : initial ? "Update testimonial" : "Create testimonial"}
+          {saving
+            ? "Saving…"
+            : initial
+              ? "Update testimonial"
+              : "Create testimonial"}
         </button>
         <button
           type="button"
-          onClick={() => router.push("/admin/testimonials")}
+          onClick={() => router.push(cmsPath("testimonials"))}
           className="rounded-full border border-border px-5 py-2.5 text-sm font-semibold hover:bg-surface"
         >
           Cancel

@@ -11,5 +11,5 @@ export default function CmsRootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <div className="theme-v2 cms-shell min-h-screen bg-black font-sans text-white">{children}</div>;
+  return <div className="theme-v2 cms-shell h-dvh max-h-dvh overflow-y-auto bg-black font-sans text-white">{children}</div>;
 }

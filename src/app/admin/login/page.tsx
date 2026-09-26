@@ -1,10 +1,5 @@
-import { Suspense } from "react";
-import AdminLoginPage from "./AdminLoginClient";
+import { CmsLoginClient } from "@/components/cms/CmsLoginClient";
 
-export default function Page() {
-  return (
-    <Suspense fallback={<div className="text-sm text-muted">Loading…</div>}>
-      <AdminLoginPage />
-    </Suspense>
-  );
+export default function CmsLoginPage() {
+  return <CmsLoginClient />;
 }

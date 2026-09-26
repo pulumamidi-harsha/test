@@ -26,7 +26,6 @@ import { Reveal } from "@/components/ui/Reveal";
 import { CountUp } from "@/components/ui/CountUp";
 import { IndustryShowcase } from "@/components/sections/IndustryShowcase";
 import { HomeCaseStudies } from "@/components/sections/HomeCaseStudies";
-import { WhyChooseShowcase } from "@/components/sections/WhyChooseShowcase";
 import { TestimonialsDeck } from "@/components/sections/TestimonialsDeck";
 // import { FaqIllustration } from "@/components/sections/FaqIllustration";
 import type { Testimonial } from "@/types/testimonial";
@@ -584,8 +583,9 @@ export function PortfolioSection() {
   return <HomeCaseStudies />;
 }
 
+/** Removed from V2 homepage — kept as no-op for any leftover imports. */
 export function WhyUsSection() {
-  return <WhyChooseShowcase />;
+  return null;
 }
 
 export function TestimonialsSection({ items }: { items: Testimonial[] }) {

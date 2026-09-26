@@ -2,7 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, LogOut, Settings, User } from "lucide-react";
+import {
+  ChevronDown,
+  LogOut,
+  MessageSquareQuote,
+  Settings,
+  User,
+} from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { cmsPath } from "@/lib/cms/admin-path";
 import { getSupabaseEnv } from "@/lib/supabase/env";
@@ -46,6 +52,16 @@ export function CmsUserMenu() {
       </button>
       {open ? (
         <div className="absolute right-0 z-50 mt-2 w-48 overflow-hidden rounded-[12px] border border-border bg-surface py-1 shadow-xl">
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(false);
+              router.push(cmsPath("testimonials"));
+            }}
+            className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-muted hover:bg-black hover:text-white"
+          >
+            <MessageSquareQuote className="h-4 w-4" /> Testimonials
+          </button>
           <button
             type="button"
             onClick={() => {

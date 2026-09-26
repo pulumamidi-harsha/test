@@ -9,7 +9,6 @@ const exploreNav = [
   { href: "/#process", label: "Process" },
   { href: "/#industries", label: "Industries" },
   { href: "/#work", label: "Work" },
-  { href: "/#why-us", label: "Why us" },
   { href: "/#reviews", label: "Reviews" },
   { href: "/news", label: "News" },
   { href: "/#faq", label: "FAQ" },

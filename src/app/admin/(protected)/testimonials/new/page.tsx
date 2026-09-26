@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { TestimonialForm } from "@/components/admin/TestimonialForm";
+import { cmsPath } from "@/lib/cms/admin-path";
 
 export default function NewTestimonialPage() {
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/admin/testimonials" className="text-sm text-muted hover:text-primary">
+        <Link href={cmsPath("testimonials")} className="text-sm text-muted hover:text-primary">
           ← Back to testimonials
         </Link>
         <h2 className="mt-2 font-heading text-2xl font-bold">Add testimonial</h2>

@@ -3,15 +3,14 @@ import { Outfit, Plus_Jakarta_Sans, Source_Sans_3 } from "next/font/google";
 import { headers } from "next/headers";
 import { ChatbotWidget } from "@/components/chatbot/ChatbotWidget";
 import { AnalyticsBeacon } from "@/components/analytics/AnalyticsBeacon";
-import { SiteFooter } from "@/components/layout/SiteFooter";
-import { SiteHeader } from "@/components/layout/SiteHeader";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { StickyWhatsApp } from "@/components/layout/StickyWhatsApp";
 import { V2Footer } from "@/components/v2/V2Footer";
 import { V2Header } from "@/components/v2/V2Header";
 import { siteConfig } from "@/config/site";
 import { isCmsAdminPath } from "@/lib/cms/admin-path";
 import "./globals.css";
-import "./v2/v2.css";
+import "../styles/theme-v2.css";
 
 const heading = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta",
@@ -49,9 +48,7 @@ export const viewport: Viewport = {
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const pathname = (await headers()).get("x-pathname") ?? "";
-  const isAdmin =
-    pathname.startsWith("/admin") || isCmsAdminPath(pathname);
-  const isLegacyV1 = pathname.startsWith("/v1");
+  const isAdmin = isCmsAdminPath(pathname);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -78,23 +75,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       className={`${heading.variable} ${body.variable} ${outfit.variable} h-full`}
     >
       <body className="flex min-h-full flex-col antialiased">
+        <GoogleAnalytics />
         {isAdmin ? (
           children
-        ) : isLegacyV1 ? (
-          <>
-            <script
-              type="application/ld+json"
-              dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-            />
-            <SiteHeader />
-            <main className="flex-1 overflow-x-clip bg-bg font-sans text-text">
-              {children}
-            </main>
-            <SiteFooter />
-            <StickyWhatsApp />
-            <ChatbotWidget />
-            <AnalyticsBeacon />
-          </>
         ) : (
           <div className="theme-v2 flex min-h-full flex-1 flex-col bg-bg font-sans text-text">
             <script

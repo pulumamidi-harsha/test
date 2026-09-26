@@ -1,12 +1,12 @@
 /**
- * Configurable CMS admin base path (Arun-style Contentful + n8n panel).
- * Default: /cms — set NEXT_PUBLIC_CMS_ADMIN_BASE=/studio (etc.) and matching rewrite.
- * Existing Supabase testimonials admin stays at /admin.
+ * Public admin URL base (news CMS + testimonials).
+ * Physical App Router tree is always `/admin`.
+ * Set NEXT_PUBLIC_CMS_ADMIN_BASE=/studio (etc.) to expose a different public path via rewrite.
  */
 export function getCmsAdminBase(): string {
-  const raw = process.env.NEXT_PUBLIC_CMS_ADMIN_BASE?.trim() || "/cms";
+  const raw = process.env.NEXT_PUBLIC_CMS_ADMIN_BASE?.trim() || "/admin";
   const base = raw.startsWith("/") ? raw : `/${raw}`;
-  return base.replace(/\/$/, "") || "/cms";
+  return base.replace(/\/$/, "") || "/admin";
 }
 
 export function cmsPath(...segments: string[]): string {
@@ -18,9 +18,9 @@ export function cmsPath(...segments: string[]): string {
   return rest ? `${base}/${rest}` : base;
 }
 
-/** True for configured public base and the physical /cms App Router tree. */
+/** True for configured public base and the physical /admin tree. */
 export function isCmsAdminPath(pathname: string): boolean {
-  const bases = new Set([getCmsAdminBase(), "/cms"]);
+  const bases = new Set([getCmsAdminBase(), "/admin"]);
   for (const base of bases) {
     if (pathname === base || pathname.startsWith(`${base}/`)) return true;
   }
@@ -28,8 +28,5 @@ export function isCmsAdminPath(pathname: string): boolean {
 }
 
 export function isCmsLoginPath(pathname: string): boolean {
-  return (
-    pathname === cmsPath("login") ||
-    pathname === "/cms/login"
-  );
+  return pathname === cmsPath("login") || pathname === "/admin/login";
 }
