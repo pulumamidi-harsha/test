@@ -32,6 +32,7 @@ export function ContactForm({ compact = false }: { compact?: boolean }) {
       businessType: String(form.get("businessType") ?? "Business"),
       city: String(form.get("city") ?? "Bangalore"),
       phone: String(form.get("phone") ?? ""),
+      email: String(form.get("email") ?? ""),
       need: String(form.get("need") ?? ""),
       message: String(form.get("message") ?? ""),
       company: String(form.get("company") ?? ""),
@@ -64,6 +65,12 @@ export function ContactForm({ compact = false }: { compact?: boolean }) {
       <form onSubmit={onSubmit} className="space-y-3">
         <Field label="Your name" name="name" required />
         <Field label="Phone / WhatsApp" name="phone" required />
+        <Field
+          label="Email (optional)"
+          name="email"
+          type="email"
+          placeholder="you@business.com"
+        />
         <label className="block text-sm font-medium text-text">
           What do you need?
           <select
@@ -96,7 +103,9 @@ export function ContactForm({ compact = false }: { compact?: boolean }) {
           {status === "loading" ? "Sending..." : "Book my free call"}
         </Button>
         {status === "success" ? (
-          <p className="text-sm font-medium text-primary">Thanks — we’ll call you soon.</p>
+          <p className="text-sm font-medium text-primary">
+            Thanks — we&apos;ll call you soon.
+          </p>
         ) : null}
         {error ? <p className="text-sm font-medium text-coral">{error}</p> : null}
         <p className="text-xs text-muted">
@@ -118,6 +127,12 @@ export function ContactForm({ compact = false }: { compact?: boolean }) {
         />
         <Field label="City" name="city" required />
         <Field label="Phone / WhatsApp" name="phone" required />
+        <Field
+          label="Email (optional)"
+          name="email"
+          type="email"
+          placeholder="you@business.com"
+        />
       </div>
       <label className="block text-sm font-medium text-text">
         What do you need?
@@ -171,17 +186,20 @@ function Field({
   name,
   required,
   placeholder,
+  type = "text",
 }: {
   label: string;
   name: string;
   required?: boolean;
   placeholder?: string;
+  type?: string;
 }) {
   return (
     <label className="block text-sm font-medium text-text">
       {label}
       <input
         name={name}
+        type={type}
         required={required}
         placeholder={placeholder}
         className={fieldClass}

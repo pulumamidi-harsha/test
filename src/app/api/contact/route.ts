@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { sendContactEmails } from "@/lib/email/send-contact";
 import { contactSchema } from "@/lib/validations";
 
 export async function POST(request: Request) {
@@ -17,19 +18,40 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: true });
     }
 
-    // MVP: log enquiry. Connect Resend/Email later via env.
+    const data = parsed.data;
+
     console.info("[contact-enquiry]", {
-      name: parsed.data.name,
-      businessType: parsed.data.businessType,
-      city: parsed.data.city,
-      phone: parsed.data.phone,
-      need: parsed.data.need,
-      message: parsed.data.message,
+      name: data.name,
+      email: data.email || null,
+      businessType: data.businessType,
+      city: data.city,
+      phone: data.phone,
+      need: data.need,
+      message: data.message,
       at: new Date().toISOString(),
     });
 
-    return NextResponse.json({ ok: true });
+    const mail = await sendContactEmails(data);
+
+    if (mail.error && !mail.adminSent && !mail.skipped) {
+      return NextResponse.json(
+        { error: "Unable to send enquiry email. Please WhatsApp us." },
+        { status: 502 },
+      );
+    }
+
+    return NextResponse.json({
+      ok: true,
+      email: {
+        admin: mail.adminSent,
+        user: mail.userSent,
+        skipped: mail.skipped,
+      },
+    });
   } catch {
-    return NextResponse.json({ error: "Unable to process enquiry" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Unable to process enquiry" },
+      { status: 500 },
+    );
   }
 }
