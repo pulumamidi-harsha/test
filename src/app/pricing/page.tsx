@@ -1,15 +1,16 @@
 import { CheckCircle2 } from "lucide-react";
 import { PageHero } from "@/components/ui/PageHero";
 import { Button } from "@/components/ui/Button";
-import { Badge, Card, Container, Section } from "@/components/ui/LayoutPrimitives";
+import { Card, Container, Section } from "@/components/ui/LayoutPrimitives";
 import { addOns, packages } from "@/config/pricing";
 import { getWhatsAppLink } from "@/config/site";
 import { createMetadata } from "@/lib/seo";
+import { cn } from "@/lib/utils";
 
 export const metadata = createMetadata({
   title: "Pricing",
   description:
-    "Transparent INR website packages for local businesses in Karnataka and Andhra Pradesh — starter, growth, and business plans.",
+    "Transparent INR website packages for local businesses in Karnataka and Andhra Pradesh — starter, growth, business, and custom plans.",
   path: "/pricing",
 });
 
@@ -21,49 +22,72 @@ export default function PricingPage() {
         title="Simple packages. Clear INR ranges."
         description="No hidden lock-in to start. Maintenance continues only if you want ongoing care after the included period."
       />
-      <Section>
-        <Container className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {packages.map((pkg) => (
-            <Card
+      <Section className="bg-surface-muted/40">
+        <Container className="grid max-w-7xl gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {packages.map((pkg, i) => (
+            <article
               key={pkg.id}
-              interactive
-              className={`h-full ${
+              className={cn(
+                "relative flex h-full flex-col overflow-hidden rounded-2xl border bg-surface p-5 shadow-[var(--shadow-card)] sm:p-6",
                 pkg.popular
-                  ? "border-accent/60 shadow-[var(--glow-amber)] ring-1 ring-accent/35 md:col-span-2 lg:col-span-1"
-                  : ""
-              }`}
+                  ? "border-primary shadow-[var(--glow-teal)]"
+                  : "border-border/90",
+              )}
             >
               {pkg.popular ? (
-                <Badge className="mb-3 border-accent/40 bg-accent-soft text-accent-hover">
-                  Most Popular
-                </Badge>
-              ) : (
-                <Badge className="mb-3 opacity-0">Package</Badge>
-              )}
-              <h2 className="font-heading text-2xl font-bold">{pkg.name}</h2>
-              <p className="mt-2 text-3xl font-bold text-primary">
-                <span className="text-base font-medium text-muted">{pkg.note} </span>
-                {pkg.price}
-              </p>
-              <p className="mt-2 text-sm text-muted">{pkg.bestFor}</p>
-              <ul className="mt-5 space-y-2">
-                {pkg.includes.map((item) => (
-                  <li key={item} className="flex gap-2 text-sm">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
-              <Button
-                href={getWhatsAppLink(`Hi, I'm interested in the ${pkg.name} package.`)}
-                variant={pkg.popular ? "whatsapp" : "secondary"}
-                className="mt-6 w-full"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Choose {pkg.name}
-              </Button>
-            </Card>
+                <div className="absolute inset-x-0 top-0 bg-primary px-3 py-1.5 text-center text-[10px] font-bold uppercase tracking-[0.16em] text-dark-text">
+                  Most popular
+                </div>
+              ) : null}
+
+              <div className={cn("flex flex-1 flex-col", pkg.popular && "pt-6")}>
+                <div
+                  aria-hidden
+                  className={cn(
+                    "h-11 w-11 overflow-hidden rounded-lg border border-border bg-primary-soft",
+                    [
+                      "bg-[repeating-linear-gradient(-45deg,var(--color-primary),var(--color-primary)_3px,transparent_3px,transparent_8px)]",
+                      "bg-[radial-gradient(circle_at_30%_30%,var(--color-accent)_0_22%,transparent_23%),radial-gradient(circle_at_70%_70%,var(--color-primary)_0_22%,#e4efef_23%)]",
+                      "bg-[linear-gradient(90deg,var(--color-primary)_50%,#e4efef_50%),linear-gradient(0deg,var(--color-primary-mid)_50%,#e4efef_50%)] bg-[length:10px_10px]",
+                      "bg-[linear-gradient(135deg,var(--color-primary)_25%,transparent_25%),linear-gradient(225deg,var(--color-primary)_25%,transparent_25%),linear-gradient(45deg,var(--color-primary)_25%,transparent_25%),linear-gradient(315deg,var(--color-primary)_25%,#e4efef_25%)] bg-[length:12px_12px]",
+                    ][i % 4],
+                  )}
+                />
+
+                <h2 className="mt-5 font-heading text-2xl font-extrabold tracking-tight text-text">
+                  {pkg.name}
+                </h2>
+                <p className="mt-2 min-h-[2.75rem] text-sm leading-relaxed text-muted">
+                  {pkg.bestFor}
+                </p>
+                <p className="mt-6 font-heading text-[1.85rem] font-extrabold tracking-tight text-primary">
+                  {pkg.price}
+                </p>
+                <p className="mt-1 text-xs text-muted">{pkg.note}</p>
+
+                <Button
+                  href={getWhatsAppLink(`Hi, I'm interested in the ${pkg.name} package.`)}
+                  variant={pkg.popular ? "dark" : "secondary"}
+                  className="mt-5 w-full rounded-full"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {pkg.cta}
+                </Button>
+
+                <p className="mt-7 text-[10px] font-bold uppercase tracking-[0.18em] text-muted">
+                  Services
+                </p>
+                <ul className="mt-3 flex-1 space-y-2.5">
+                  {pkg.includes.map((item) => (
+                    <li key={item} className="flex items-start gap-2.5 text-sm text-text">
+                      <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary/45" />
+                      <span className="leading-snug">{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </article>
           ))}
         </Container>
       </Section>

@@ -25,6 +25,22 @@
   --color-dark: #07181c;
   --color-dark-text: #f6f1e8;
 
+  /* Soft dark band — lifted teal, not pure black */
+  --color-soft-dark: #1a4345;
+  --color-soft-dark-mid: #245456;
+  --color-soft-dark-deep: #143638;
+
+  /*
+   * Neon system (Premier-style: thin gradient line + ambient blur dots).
+   * Change these hex / rgb values to retheme glows site-wide.
+   */
+  --color-neon: #e4a01a;
+  --color-neon-mid: #f5c84a;
+  --color-neon-deep: #c8870f;
+  --color-neon-rgb: 228, 160, 26;
+  --color-ink: #05080a;
+  --color-ink-elevated: #12181c;
+
   --color-whatsapp: #22c55e;
   --color-whatsapp-hover: #16a34a;
   --color-coral: #c96b5c;
@@ -36,6 +52,16 @@
   --shadow-dark: 0 24px 60px rgba(7, 24, 28, 0.35);
   --glow-amber: 0 0 0 1px rgba(228, 160, 26, 0.22), 0 12px 40px rgba(228, 160, 26, 0.18);
   --glow-teal: 0 0 0 1px rgba(26, 85, 86, 0.18), 0 16px 48px rgba(12, 53, 54, 0.16);
+  --glow-neon:
+    0 0 0 1px rgba(var(--color-neon-rgb), 0.35),
+    0 0 28px rgba(var(--color-neon-rgb), 0.35),
+    0 0 56px rgba(var(--color-neon-rgb), 0.18);
+  --neon-line: linear-gradient(
+    90deg,
+    var(--color-neon) 0%,
+    var(--color-neon-mid) 55%,
+    transparent 100%
+  );
 }
 
 @theme inline {
@@ -55,6 +81,14 @@
   --color-border: var(--color-border);
   --color-dark: var(--color-dark);
   --color-dark-text: var(--color-dark-text);
+  --color-soft-dark: var(--color-soft-dark);
+  --color-soft-dark-mid: var(--color-soft-dark-mid);
+  --color-soft-dark-deep: var(--color-soft-dark-deep);
+  --color-neon: var(--color-neon);
+  --color-neon-mid: var(--color-neon-mid);
+  --color-neon-deep: var(--color-neon-deep);
+  --color-ink: var(--color-ink);
+  --color-ink-elevated: var(--color-ink-elevated);
   --color-whatsapp: var(--color-whatsapp);
   --color-whatsapp-hover: var(--color-whatsapp-hover);
   --color-coral: var(--color-coral);
@@ -64,6 +98,8 @@
 
 * {
   box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent) transparent;
 }
 
 html {
@@ -100,6 +136,31 @@ h4 {
   color: var(--color-text);
 }
 
+/* Thin brand scrollbar (Firefox handled on * above) */
+
+/* Thin brand scrollbar (Chrome / Safari / Edge) */
+*::-webkit-scrollbar {
+  width: 3px;
+  height: 3px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--color-accent);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent-hover);
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
 @keyframes marquee {
   from {
     transform: translateX(0);
@@ -108,6 +169,7 @@ h4 {
     transform: translateX(-50%);
   }
 }
+
 
 @keyframes soft-float {
   0%,
@@ -149,10 +211,70 @@ h4 {
     linear-gradient(145deg, #0a2f30 0%, var(--color-primary) 45%, #134849 100%);
 }
 
+.band-soft-dark {
+  background-color: var(--color-soft-dark);
+  background-image:
+    radial-gradient(ellipse 65% 70% at 100% 0%, rgba(228, 160, 26, 0.14), transparent 48%),
+    radial-gradient(ellipse 55% 60% at 0% 100%, rgba(246, 241, 232, 0.06), transparent 50%),
+    linear-gradient(
+      155deg,
+      var(--color-soft-dark-deep) 0%,
+      var(--color-soft-dark) 48%,
+      var(--color-soft-dark-mid) 100%
+    );
+  color: var(--color-dark-text);
+}
+
 .band-cta {
   background:
     radial-gradient(ellipse 55% 70% at 0% 50%, rgba(228, 160, 26, 0.22), transparent 55%),
     linear-gradient(135deg, #082628 0%, var(--color-primary) 55%, #1a5556 100%);
+}
+
+/* —— Neon design system (Premier-inspired placement) —— */
+
+.band-ink {
+  background: var(--color-ink);
+  color: var(--color-dark-text);
+}
+
+.neon-line {
+  display: block;
+  height: 1px;
+  width: 5rem;
+  background: var(--neon-line);
+  box-shadow: 0 0 12px rgba(var(--color-neon-rgb), 0.55);
+}
+
+.neon-dot {
+  pointer-events: none;
+  position: absolute;
+  border-radius: 9999px;
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    rgba(var(--color-neon-rgb), 0.55) 0%,
+    rgba(var(--color-neon-rgb), 0) 70%
+  );
+  filter: blur(2px);
+}
+
+.neon-dot-strong {
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    rgba(var(--color-neon-rgb), 0.85) 0%,
+    rgba(var(--color-neon-rgb), 0) 72%
+  );
+}
+
+.neon-glass {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--glow-neon);
+}
+
+.neon-glass:hover {
+  background: rgba(255, 255, 255, 0.14);
 }
 
 .text-link {

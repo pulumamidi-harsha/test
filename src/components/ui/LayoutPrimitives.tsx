@@ -36,19 +36,24 @@ export function SectionHeading({
   description,
   align = "left",
   className,
+  tone = "light",
 }: {
   eyebrow?: string;
   title: string;
   description?: string;
   align?: "left" | "center";
   className?: string;
+  /** soft-dark = cream type on soft-dark bands */
+  tone?: "light" | "soft-dark";
 }) {
+  const dark = tone === "soft-dark";
   return (
     <div className={cn("max-w-2xl", align === "center" && "mx-auto text-center", className)}>
       {eyebrow ? (
         <p
           className={cn(
-            "mb-3 inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.14em] text-primary",
+            "mb-3 inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.14em]",
+            dark ? "text-accent" : "text-primary",
             align === "center" && "mx-auto",
           )}
         >
@@ -56,11 +61,21 @@ export function SectionHeading({
           {eyebrow}
         </p>
       ) : null}
-      <h2 className="font-heading text-2xl font-bold leading-tight text-text sm:text-3xl md:text-4xl">
+      <h2
+        className={cn(
+          "font-heading text-2xl font-bold leading-tight sm:text-3xl md:text-4xl",
+          dark ? "text-dark-text" : "text-text",
+        )}
+      >
         {title}
       </h2>
       {description ? (
-        <p className="mt-3 text-sm leading-relaxed text-muted sm:mt-4 sm:text-base md:text-lg">
+        <p
+          className={cn(
+            "mt-3 text-sm leading-relaxed sm:mt-4 sm:text-base md:text-lg",
+            dark ? "text-dark-text/70" : "text-muted",
+          )}
+        >
           {description}
         </p>
       ) : null}

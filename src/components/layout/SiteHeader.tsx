@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Menu, MessageCircle, Phone, X } from "lucide-react";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { mainNav } from "@/config/navigation";
 import { getWhatsAppLink, siteConfig } from "@/config/site";
 import { Button } from "@/components/ui/Button";
@@ -43,21 +44,10 @@ export function SiteHeader() {
       )}
     >
       <Container className="flex h-14 items-center justify-between gap-3 sm:h-16 md:h-[4.25rem]">
-        <Link
-          href="/"
-          className="group flex min-w-0 items-center gap-2 font-heading text-base font-bold text-primary transition hover:opacity-90 sm:text-lg"
-          onClick={() => setOpen(false)}
-        >
-          <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary-mid to-primary text-sm text-white shadow-sm ring-1 ring-white/10 transition group-hover:shadow-[var(--glow-amber)]">
-            N
-          </span>
-          <span className="truncate">
-            <span className="sm:hidden">{siteConfig.shortName}</span>
-            <span className="hidden sm:inline">{siteConfig.brandName}</span>
-          </span>
-        </Link>
+        <div onClick={() => setOpen(false)}>
+          <BrandLogo variant="mark" />
+        </div>
 
-        {/* Compact tablet+ nav */}
         <nav className="hidden items-center gap-0.5 md:flex lg:gap-1">
           {mainNav.map((item) => (
             <Link

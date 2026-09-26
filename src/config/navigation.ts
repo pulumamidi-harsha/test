@@ -1,10 +1,12 @@
 export const mainNav = [
-  { href: "/#services", label: "Services" },
-  { href: "/#process", label: "Process" },
-  { href: "/#work", label: "Work" },
-  { href: "/#why-us", label: "Why us" },
-  { href: "/#reviews", label: "Reviews" },
-  { href: "/#faq", label: "FAQ" },
+  { href: "/v1#services", label: "Services" },
+  { href: "/v1#process", label: "Process" },
+  { href: "/v1#industries", label: "Industries" },
+  { href: "/v1#work", label: "Work" },
+  { href: "/v1#why-us", label: "Why us" },
+  { href: "/v1#reviews", label: "Reviews" },
+  { href: "/news", label: "News" },
+  { href: "/v1#faq", label: "FAQ" },
 ] as const;
 
 export const footerNav = {

@@ -1,19 +1,6 @@
-import {
-  AmcSection,
-  FaqSection,
-  FinalCtaSection,
-  FullStackSection,
-  HeroSection,
-  IndustriesSection,
-  PitchSection,
-  PortfolioSection,
-  PricingTeaserSection,
-  ProcessSection,
-  ServicesSection,
-  StatsSection,
-  TestimonialsSection,
-  WhyUsSection,
-} from "@/components/sections/HomeSections";
+import { V2HomePage } from "@/components/v2/V2HomePage";
+import { getNewsSummaries } from "@/lib/contentful/news";
+import { getPublishedTestimonials } from "@/lib/testimonials/queries";
 import { createMetadata } from "@/lib/seo";
 
 export const metadata = createMetadata({
@@ -23,23 +10,12 @@ export const metadata = createMetadata({
   path: "/",
 });
 
-export default function HomePage() {
-  return (
-    <>
-      <HeroSection />
-      <StatsSection />
-      <FullStackSection />
-      <PitchSection />
-      <ServicesSection />
-      <ProcessSection />
-      <IndustriesSection />
-      <PortfolioSection />
-      <AmcSection />
-      <PricingTeaserSection />
-      <WhyUsSection />
-      <TestimonialsSection />
-      <FaqSection />
-      <FinalCtaSection />
-    </>
-  );
+/** Main homepage — V2 black / violet system */
+export default async function HomePage() {
+  const [testimonials, news] = await Promise.all([
+    getPublishedTestimonials(),
+    getNewsSummaries(8),
+  ]);
+
+  return <V2HomePage testimonials={testimonials} news={news} />;
 }

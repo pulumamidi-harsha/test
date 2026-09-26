@@ -1,11 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans, Source_Sans_3 } from "next/font/google";
+import { Outfit, Plus_Jakarta_Sans, Source_Sans_3 } from "next/font/google";
+import { headers } from "next/headers";
 import { ChatbotWidget } from "@/components/chatbot/ChatbotWidget";
+import { AnalyticsBeacon } from "@/components/analytics/AnalyticsBeacon";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
 import { StickyWhatsApp } from "@/components/layout/StickyWhatsApp";
+import { V2Footer } from "@/components/v2/V2Footer";
+import { V2Header } from "@/components/v2/V2Header";
 import { siteConfig } from "@/config/site";
+import { isCmsAdminPath } from "@/lib/cms/admin-path";
 import "./globals.css";
+import "./v2/v2.css";
 
 const heading = Plus_Jakarta_Sans({
   variable: "--font-plus-jakarta",
@@ -17,6 +23,12 @@ const body = Source_Sans_3({
   variable: "--font-source-sans",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+});
+
+const outfit = Outfit({
+  variable: "--font-outfit",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -32,10 +44,15 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#0c3536",
+  themeColor: "#000000",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const pathname = (await headers()).get("x-pathname") ?? "";
+  const isAdmin =
+    pathname.startsWith("/admin") || isCmsAdminPath(pathname);
+  const isLegacyV1 = pathname.startsWith("/v1");
+
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "ProfessionalService",
@@ -56,17 +73,42 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   };
 
   return (
-    <html lang="en" className={`${heading.variable} ${body.variable} h-full`}>
-      <body className="min-h-full bg-bg pb-[max(5.5rem,calc(env(safe-area-inset-bottom)+4.75rem))] font-sans text-text antialiased">
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-        <SiteHeader />
-        <main className="flex-1 overflow-x-hidden">{children}</main>
-        <SiteFooter />
-        <StickyWhatsApp />
-        <ChatbotWidget />
+    <html
+      lang="en"
+      className={`${heading.variable} ${body.variable} ${outfit.variable} h-full`}
+    >
+      <body className="flex min-h-full flex-col antialiased">
+        {isAdmin ? (
+          children
+        ) : isLegacyV1 ? (
+          <>
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            <SiteHeader />
+            <main className="flex-1 overflow-x-clip bg-bg font-sans text-text">
+              {children}
+            </main>
+            <SiteFooter />
+            <StickyWhatsApp />
+            <ChatbotWidget />
+            <AnalyticsBeacon />
+          </>
+        ) : (
+          <div className="theme-v2 flex min-h-full flex-1 flex-col bg-bg font-sans text-text">
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            <V2Header />
+            <main className="flex-1 overflow-x-clip">{children}</main>
+            <V2Footer />
+            <StickyWhatsApp />
+            <ChatbotWidget />
+            <AnalyticsBeacon />
+          </div>
+        )}
       </body>
     </html>
   );
