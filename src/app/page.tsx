@@ -1,5 +1,6 @@
 import { V2HomePage } from "@/components/v2/V2HomePage";
 import { getNewsSummaries } from "@/lib/contentful/news";
+import { getProjectSummaries } from "@/lib/contentful/projects";
 import { getPublishedTestimonials } from "@/lib/testimonials/queries";
 import { createMetadata } from "@/lib/seo";
 
@@ -12,10 +13,17 @@ export const metadata = createMetadata({
 
 /** Main homepage — V2 black / violet system */
 export default async function HomePage() {
-  const [testimonials, news] = await Promise.all([
+  const [testimonials, news, projects] = await Promise.all([
     getPublishedTestimonials(),
     getNewsSummaries(8),
+    getProjectSummaries(8),
   ]);
 
-  return <V2HomePage testimonials={testimonials} news={news} />;
+  return (
+    <V2HomePage
+      testimonials={testimonials}
+      news={news}
+      projects={projects}
+    />
+  );
 }

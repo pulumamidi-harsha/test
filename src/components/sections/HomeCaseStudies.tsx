@@ -1,35 +1,34 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   useCallback,
   useEffect,
   useRef,
   useState,
+  type CSSProperties,
   type KeyboardEvent,
   type PointerEvent as ReactPointerEvent,
 } from "react";
-import { portfolio } from "@/config/portfolio";
 import {
   getWorkShowcaseColumns,
   getWorkShowcaseMaxProjects,
 } from "@/config/work-showcase";
+import type { WorkProject } from "@/types/project";
 import { cn } from "@/lib/utils";
 
 const GAP_PX = 28;
+const DRAG_THRESHOLD = 10;
 
-/**
- * agr.studio-style Work strip:
- * - Rounded media cards
- * - Title always under the image; description reveals on hover (right)
- * - Horizontal scroll: drag, arrows, keyboard ←/→
- * - Columns + max count from NEXT_PUBLIC_WORK_* env
- */
-export function HomeCaseStudies() {
+export function HomeCaseStudies({
+  projects = [],
+}: {
+  projects?: WorkProject[];
+}) {
   const columns = getWorkShowcaseColumns();
   const maxProjects = getWorkShowcaseMaxProjects();
-  const projects = portfolio.slice(0, maxProjects);
+  const items = projects.slice(0, maxProjects);
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [cardWidth, setCardWidth] = useState(0);
@@ -38,7 +37,7 @@ export function HomeCaseStudies() {
 
   const dragRef = useRef({
     active: false,
-    moved: false,
+    dragging: false,
     startX: 0,
     scrollLeft: 0,
     pointerId: -1,
@@ -51,7 +50,14 @@ export function HomeCaseStudies() {
     const padL = parseFloat(styles.paddingLeft) || 0;
     const padR = parseFloat(styles.paddingRight) || 0;
     const inner = scroller.clientWidth - padL - padR;
-    const width = Math.max(180, (inner - GAP_PX * (columns - 1)) / columns);
+    const isMobile = window.matchMedia("(max-width: 639px)").matches;
+    const isTablet = window.matchMedia("(max-width: 1023px)").matches;
+    const visibleColumns = isMobile ? 1 : isTablet ? Math.min(2, columns) : columns;
+    const peek = isMobile ? inner * 0.12 : 0;
+    const width = Math.max(
+      isMobile ? 260 : 200,
+      (inner - peek - GAP_PX * (visibleColumns - 1)) / visibleColumns,
+    );
     setCardWidth(width);
   }, [columns]);
 
@@ -77,7 +83,7 @@ export function HomeCaseStudies() {
       ro.disconnect();
       window.removeEventListener("resize", measure);
     };
-  }, [measure, syncArrows]);
+  }, [measure, syncArrows, items.length]);
 
   const scrollByCard = useCallback(
     (dir: -1 | 1) => {
@@ -98,18 +104,18 @@ export function HomeCaseStudies() {
     }
   };
 
+  // Mouse-only drag. Touch uses native overflow scroll so taps reach Links.
   const onPointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
-    if (e.button !== 0) return;
+    if (e.button !== 0 || e.pointerType === "touch") return;
     const el = scrollerRef.current;
     if (!el) return;
     dragRef.current = {
       active: true,
-      moved: false,
+      dragging: false,
       startX: e.clientX,
       scrollLeft: el.scrollLeft,
       pointerId: e.pointerId,
     };
-    el.setPointerCapture(e.pointerId);
   };
 
   const onPointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
@@ -118,14 +124,25 @@ export function HomeCaseStudies() {
     const el = scrollerRef.current;
     if (!el) return;
     const dx = e.clientX - d.startX;
-    if (Math.abs(dx) > 6) d.moved = true;
-    el.scrollLeft = d.scrollLeft - dx;
+    if (!d.dragging && Math.abs(dx) > DRAG_THRESHOLD) {
+      d.dragging = true;
+      try {
+        el.setPointerCapture(e.pointerId);
+      } catch {
+        /* ignore */
+      }
+    }
+    if (d.dragging) {
+      el.scrollLeft = d.scrollLeft - dx;
+    }
   };
 
   const endDrag = (e: ReactPointerEvent<HTMLDivElement>) => {
     const d = dragRef.current;
     if (!d.active) return;
+    const wasDragging = d.dragging;
     d.active = false;
+    d.dragging = false;
     const el = scrollerRef.current;
     if (el && d.pointerId === e.pointerId) {
       try {
@@ -134,7 +151,24 @@ export function HomeCaseStudies() {
         /* already released */
       }
     }
+    // Keep flag briefly so the synthetic click after a drag is cancelled
+    if (wasDragging) {
+      dragRef.current.dragging = true;
+      requestAnimationFrame(() => {
+        dragRef.current.dragging = false;
+      });
+    }
   };
+
+  const cardStyle =
+    cardWidth > 0
+      ? ({ "--work-card-w": `${cardWidth}px` } as CSSProperties)
+      : undefined;
+
+  const cardClass =
+    "group shrink-0 snap-start w-[min(20rem,calc(100vw-3rem))] sm:w-[var(--work-card-w,50%)] sm:min-w-[var(--work-card-w,50%)]";
+
+  if (!items.length) return null;
 
   return (
     <section
@@ -145,8 +179,8 @@ export function HomeCaseStudies() {
       className="relative scroll-mt-20 bg-bg py-16 text-text outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary sm:py-20"
     >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-end justify-between gap-6">
-          <div>
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="min-w-0">
             <p className="text-sm text-muted">
               <span className="text-primary">[</span> Work{" "}
               <span className="text-primary">]</span>
@@ -159,7 +193,6 @@ export function HomeCaseStudies() {
             </h2>
           </div>
 
-          {/* Arrows with the title row (top-right) */}
           <div className="flex shrink-0 items-center gap-2 pb-1">
             <button
               type="button"
@@ -201,76 +234,119 @@ export function HomeCaseStudies() {
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
         className={cn(
-          "mt-10 flex touch-pan-y overflow-x-auto overflow-y-hidden px-4 pb-2 sm:px-6 lg:px-8",
+          "mt-10 flex touch-pan-x overflow-x-auto overflow-y-hidden pb-2",
+          "pl-4 pr-4 sm:pl-6 sm:pr-6 lg:pl-8 lg:pr-8",
+          "scroll-pl-4 sm:scroll-pl-6 lg:scroll-pl-8",
+          "mx-auto max-w-7xl",
+          "snap-x snap-mandatory",
           "[-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
           "cursor-grab active:cursor-grabbing",
         )}
         style={{ gap: GAP_PX }}
       >
-        {projects.map((project) => (
-          <Link
-            key={project.id}
-            href={`/work/${project.id}`}
-            draggable={false}
-            onClick={(e) => {
-              if (dragRef.current.moved) {
-                e.preventDefault();
-                dragRef.current.moved = false;
-              }
-            }}
-            className="group shrink-0"
-            style={
-              cardWidth > 0
-                ? { width: cardWidth, minWidth: cardWidth }
-                : { width: `${100 / columns}%`, minWidth: `${Math.max(40, 100 / columns)}%` }
-            }
-          >
-            <div
-              className="relative aspect-[5/4] overflow-hidden rounded-[1.35rem] sm:aspect-[4/3]"
-              style={{ background: project.accent }}
+        {items.map((project) => {
+          const blurb = project.blurb || project.subtitle || project.excerpt;
+          return (
+            <Link
+              key={project.id}
+              href={`/work/${project.slug}`}
+              draggable={false}
+              onClick={(e) => {
+                if (dragRef.current.dragging) {
+                  e.preventDefault();
+                }
+              }}
+              className={cardClass}
+              style={cardStyle}
             >
               <div
-                aria-hidden
-                className="absolute inset-0"
-                style={{
-                  background: `linear-gradient(145deg, ${project.accent} 0%, ${project.accent}cc 45%, rgba(0,0,0,0.2) 100%)`,
-                }}
-              />
-              <video
-                src={project.videoDesktop}
-                muted
-                loop
-                playsInline
-                autoPlay
-                preload="metadata"
-                draggable={false}
-                className="absolute inset-0 h-full w-full object-cover opacity-80 transition duration-700 group-hover:scale-[1.03]"
-              />
-              <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
-              <span
-                aria-hidden
-                className="absolute bottom-4 left-4 font-heading text-[clamp(2.5rem,6vw,4rem)] font-bold leading-none tracking-[-0.05em] text-white/25"
+                className="relative aspect-[4/3] overflow-hidden rounded-[1.35rem]"
+                style={{ background: project.accent }}
               >
-                {project.title.slice(0, 1)}
+                <div
+                  aria-hidden
+                  className="absolute inset-0"
+                  style={{
+                    background: `linear-gradient(145deg, ${project.accent} 0%, ${project.accent}cc 45%, rgba(0,0,0,0.25) 100%)`,
+                  }}
+                />
+                {project.image ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={project.image}
+                    alt=""
+                    draggable={false}
+                    className="absolute inset-0 h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
+                  />
+                ) : project.videoDesktop || project.videoUrl ? (
+                  <video
+                    src={project.videoDesktop || project.videoUrl || undefined}
+                    muted
+                    loop
+                    playsInline
+                    autoPlay
+                    preload="metadata"
+                    draggable={false}
+                    className="absolute inset-0 h-full w-full object-cover opacity-85 transition duration-700 group-hover:scale-[1.03]"
+                  />
+                ) : (
+                  <span
+                    aria-hidden
+                    className="absolute bottom-4 left-4 font-heading text-[clamp(2.5rem,6vw,4rem)] font-bold leading-none tracking-[-0.05em] text-white/30"
+                  >
+                    {project.title.slice(0, 1)}
+                  </span>
+                )}
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
+              </div>
+
+              <div className="mt-4 space-y-1.5 px-0.5">
+                <h3 className="font-heading text-lg font-semibold leading-snug tracking-tight text-text line-clamp-2 sm:text-xl">
+                  {project.title}
+                </h3>
+                {blurb ? (
+                  <p className="text-sm leading-snug text-muted line-clamp-2">
+                    {blurb}
+                  </p>
+                ) : null}
+              </div>
+            </Link>
+          );
+        })}
+
+        {/* Final card — View all (same footprint as project cards) */}
+        <Link
+          href="/work"
+          draggable={false}
+          onClick={(e) => {
+            if (dragRef.current.dragging) e.preventDefault();
+          }}
+          className={cardClass}
+          style={cardStyle}
+          aria-label="View all projects"
+        >
+          <div className="relative flex aspect-[4/3] flex-col justify-between overflow-hidden rounded-[1.35rem] border border-border bg-surface p-6 transition group-hover:border-primary/50 sm:p-8">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_80%_20%,rgba(70,0,187,0.35),transparent_55%)]"
+            />
+            <span className="relative text-xs font-semibold uppercase tracking-[0.16em] text-primary">
+              Portfolio
+            </span>
+            <div className="relative">
+              <p className="font-heading text-2xl font-semibold tracking-tight text-white sm:text-3xl">
+                View all
+                <br />
+                projects
+              </p>
+              <span className="mt-5 inline-flex h-11 w-11 items-center justify-center rounded-full bg-primary text-white transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+                <ArrowUpRight className="h-5 w-5" />
               </span>
             </div>
-
-            <div className="mt-4 flex items-baseline justify-between gap-4 px-0.5">
-              <h3 className="min-w-0 truncate font-heading text-base font-semibold tracking-tight text-text sm:text-lg">
-                {project.title}
-              </h3>
-              <p
-                className={cn(
-                  "max-w-[55%] shrink-0 text-right text-xs font-normal leading-snug text-muted transition duration-300 sm:text-sm",
-                  "translate-x-1 opacity-0 group-hover:translate-x-0 group-hover:opacity-100",
-                  "group-focus-visible:translate-x-0 group-focus-visible:opacity-100",
-                )}
-              >
-                {project.blurb}
-              </p>
-            </div>
-          </Link>
-        ))}
+          </div>
+          {/* Spacer matches project title+blurb height so carousel row stays even */}
+          <div className="mt-4 h-[3.75rem] sm:h-[4.25rem]" aria-hidden />
+        </Link>
       </div>
     </section>
   );

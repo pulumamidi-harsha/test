@@ -1,8 +1,9 @@
 export const mainNav = [
+  { href: "/", label: "Home" },
   { href: "/#services", label: "Services" },
   { href: "/#process", label: "Process" },
   { href: "/#industries", label: "Industries" },
-  { href: "/#work", label: "Work" },
+  { href: "/work", label: "Work" },
   { href: "/#reviews", label: "Reviews" },
   { href: "/news", label: "News" },
   { href: "/#faq", label: "FAQ" },

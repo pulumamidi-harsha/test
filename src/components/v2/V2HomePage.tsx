@@ -22,6 +22,7 @@ import { faqs } from "@/config/faqs";
 import { getWhatsAppLink, siteConfig } from "@/config/site";
 import type { Testimonial } from "@/types/testimonial";
 import type { NewsItem } from "@/config/news";
+import type { WorkProject } from "@/types/project";
 // import { FaqIllustration } from "@/components/sections/FaqIllustration";
 
 const quoteCta = "Free call · Fixed price · Ready in days";
@@ -45,9 +46,11 @@ const industryLabels = [
 export function V2HomePage({
   testimonials,
   news,
+  projects = [],
 }: {
   testimonials: Testimonial[];
   news?: NewsItem[];
+  projects?: WorkProject[];
 }) {
   return (
     <>
@@ -58,7 +61,7 @@ export function V2HomePage({
       <Services />
       <Process />
       <IndustryShowcase />
-      <HomeCaseStudies />
+      <HomeCaseStudies projects={projects} />
       <Amc />
       <Pricing />
       <TestimonialsDeck items={testimonials} />

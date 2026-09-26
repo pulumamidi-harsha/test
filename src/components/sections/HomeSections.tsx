@@ -579,8 +579,12 @@ export function IndustriesSection() {
   return <IndustryShowcase />;
 }
 
-export function PortfolioSection() {
-  return <HomeCaseStudies />;
+export function PortfolioSection({
+  projects = [],
+}: {
+  projects?: import("@/types/project").WorkProject[];
+}) {
+  return <HomeCaseStudies projects={projects} />;
 }
 
 /** Removed from V2 homepage — kept as no-op for any leftover imports. */

@@ -38,8 +38,10 @@ export function BrandLogo({
       height={asset.height}
       decoding="async"
       className={cn(
-        "h-auto w-auto select-none object-contain object-left",
-        variant === "mark" && "h-8 w-auto max-w-[9.5rem] sm:h-9 sm:max-w-[11rem]",
+        "block select-none object-contain object-left",
+        // Do not mix h-auto with fixed h-* — without twMerge the wrong one wins and the logo collapses to 0×0
+        variant === "mark" &&
+          "h-8 w-auto max-h-8 max-w-[10rem] sm:h-9 sm:max-h-9 sm:max-w-[12rem]",
         variant === "footer" && "h-auto w-full max-w-none",
         className,
       )}
@@ -49,7 +51,11 @@ export function BrandLogo({
   if (!linked) return image;
 
   return (
-    <Link href="/" aria-label={asset.alt} className="inline-flex max-w-full items-center">
+    <Link
+      href="/"
+      aria-label={asset.alt}
+      className="inline-flex max-w-full shrink-0 items-center"
+    >
       {image}
     </Link>
   );
