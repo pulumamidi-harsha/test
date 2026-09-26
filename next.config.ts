@@ -35,6 +35,8 @@ const nextConfig: NextConfig = {
     ],
   },
   async redirects() {
+    // Admin path aliases only.
+    // Do NOT add /v1|/v2|/v3 → / redirects (those routes render 404).
     return [
       { source: "/cms", destination: "/admin", permanent: false },
       { source: "/cms/:path*", destination: "/admin/:path*", permanent: false },

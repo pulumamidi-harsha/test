@@ -11,7 +11,7 @@ export const metadata = createMetadata({
   path: "/",
 });
 
-/** Main homepage — V2 black / violet system */
+/** Main homepage */
 export default async function HomePage() {
   const [testimonials, news, projects] = await Promise.all([
     getPublishedTestimonials(),

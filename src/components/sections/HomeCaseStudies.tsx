@@ -23,9 +23,13 @@ const DRAG_THRESHOLD = 10;
 
 export function HomeCaseStudies({
   projects = [],
+  tone = "dark",
 }: {
   projects?: WorkProject[];
+  /** `light` = gray/white band; `dark` = black band */
+  tone?: "dark" | "light";
 }) {
+  const isLight = tone === "light";
   const columns = getWorkShowcaseColumns();
   const maxProjects = getWorkShowcaseMaxProjects();
   const items = projects.slice(0, maxProjects);
@@ -176,18 +180,49 @@ export function HomeCaseStudies({
       tabIndex={0}
       aria-labelledby="home-case-studies-title"
       onKeyDown={onKeyDown}
-      className="relative scroll-mt-20 bg-bg py-16 text-text outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary sm:py-20"
+      className={cn(
+        "relative scroll-mt-20 overflow-hidden py-16 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary sm:py-20",
+        isLight ? "v2-light" : "bg-black text-white",
+      )}
     >
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      {!isLight ? (
+        <>
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -left-24 top-1/4 h-72 w-72 rounded-full bg-primary/20 blur-3xl"
+          />
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -right-16 bottom-0 h-64 w-64 rounded-full bg-accent/15 blur-3xl"
+          />
+        </>
+      ) : null}
+
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="min-w-0">
-            <p className="text-sm text-muted">
-              <span className="text-primary">[</span> Work{" "}
-              <span className="text-primary">]</span>
+            <p
+              className={cn(
+                "text-sm",
+                isLight ? "text-[var(--color-light-text)]" : "text-white/90",
+              )}
+            >
+              <span className={isLight ? "text-primary" : "text-accent"}>
+                [
+              </span>{" "}
+              Work{" "}
+              <span className={isLight ? "text-primary" : "text-accent"}>
+                ]
+              </span>
             </p>
             <h2
               id="home-case-studies-title"
-              className="mt-3 font-heading text-[clamp(2rem,4vw,3.25rem)] tracking-tight"
+              className={cn(
+                "mt-3 font-heading text-[clamp(2rem,4vw,3.25rem)] tracking-tight",
+                isLight
+                  ? "text-[var(--color-light-text)]"
+                  : "text-white",
+              )}
             >
               Selected projects
             </h2>
@@ -200,9 +235,12 @@ export function HomeCaseStudies({
               disabled={!canPrev}
               onClick={() => scrollByCard(-1)}
               className={cn(
-                "inline-flex h-11 w-11 items-center justify-center rounded-full border border-border transition",
+                "inline-flex h-11 w-11 items-center justify-center rounded-full border transition",
+                isLight ? "border-black/15" : "border-border",
                 canPrev
-                  ? "text-text hover:border-primary hover:text-primary"
+                  ? isLight
+                    ? "text-[var(--color-light-text)] hover:border-primary hover:text-primary"
+                    : "text-text hover:border-primary hover:text-primary"
                   : "cursor-not-allowed opacity-35",
               )}
             >
@@ -214,9 +252,12 @@ export function HomeCaseStudies({
               disabled={!canNext}
               onClick={() => scrollByCard(1)}
               className={cn(
-                "inline-flex h-11 w-11 items-center justify-center rounded-full border border-border transition",
+                "inline-flex h-11 w-11 items-center justify-center rounded-full border transition",
+                isLight ? "border-black/15" : "border-border",
                 canNext
-                  ? "text-text hover:border-primary hover:text-primary"
+                  ? isLight
+                    ? "text-[var(--color-light-text)] hover:border-primary hover:text-primary"
+                    : "text-text hover:border-primary hover:text-primary"
                   : "cursor-not-allowed opacity-35",
               )}
             >
@@ -234,7 +275,7 @@ export function HomeCaseStudies({
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
         className={cn(
-          "mt-10 flex touch-pan-x overflow-x-auto overflow-y-hidden pb-2",
+          "relative mt-10 flex touch-pan-x overflow-x-auto overflow-y-hidden pb-2",
           "pl-4 pr-4 sm:pl-6 sm:pr-6 lg:pl-8 lg:pr-8",
           "scroll-pl-4 sm:scroll-pl-6 lg:scroll-pl-8",
           "mx-auto max-w-7xl",
@@ -301,11 +342,25 @@ export function HomeCaseStudies({
               </div>
 
               <div className="mt-4 space-y-1.5 px-0.5">
-                <h3 className="font-heading text-lg font-semibold leading-snug tracking-tight text-text line-clamp-2 sm:text-xl">
+                <h3
+                  className={cn(
+                    "font-heading text-lg font-semibold leading-snug tracking-tight line-clamp-2 sm:text-xl",
+                    isLight
+                      ? "text-[var(--color-light-text)]"
+                      : "text-text",
+                  )}
+                >
                   {project.title}
                 </h3>
                 {blurb ? (
-                  <p className="text-sm leading-snug text-muted line-clamp-2">
+                  <p
+                    className={cn(
+                      "text-sm leading-snug line-clamp-2",
+                      isLight
+                        ? "text-[var(--color-light-muted)]"
+                        : "text-muted",
+                    )}
+                  >
                     {blurb}
                   </p>
                 ) : null}

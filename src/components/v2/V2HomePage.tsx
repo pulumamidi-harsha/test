@@ -41,7 +41,9 @@ const industryLabels = [
 ];
 
 /**
- * Full V2 homepage — same content sections as V1, Premier-inspired dark/light rhythm.
+ * Main homepage.
+ * Story: offer → services → who we serve → process → proof (work) → price → care → social.
+ * Work sits between two light bands (Process → Work → Pricing) so black reads cleanly.
  */
 export function V2HomePage({
   testimonials,
@@ -59,11 +61,11 @@ export function V2HomePage({
       <FullStack />
       <Pitch />
       <Services />
-      <Process />
       <IndustryShowcase />
+      <Process />
       <HomeCaseStudies projects={projects} />
-      <Amc />
       <Pricing />
+      <Amc />
       <TestimonialsDeck items={testimonials} />
       <NewsCarousel items={news} />
       <Faq />
@@ -201,25 +203,25 @@ function FullStack() {
   ];
 
   return (
-    <section className="bg-black py-16 sm:py-20">
+    <section className="v2-light py-16 sm:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-sm text-white/90">
-            <span className="text-accent">[</span> What you get{" "}
-            <span className="text-accent">]</span>
+          <p className="text-sm text-[var(--color-light-text)]">
+            <span className="text-primary">[</span> What you get{" "}
+            <span className="text-primary">]</span>
           </p>
-          <h2 className="mt-3 font-heading text-[clamp(2rem,4vw,3rem)] text-white">
+          <h2 className="mt-3 font-heading text-[clamp(2rem,4vw,3rem)] text-[var(--color-light-text)]">
             Logo to go-live — one team handles it
           </h2>
-          <p className="mt-4 text-base font-light text-muted">
+          <p className="mt-4 text-base font-light text-[var(--color-light-muted)]">
             Domain, design, code, hosting, and maintenance under one roof. Not five vendors.
           </p>
           <span className="neon-line mx-auto mt-5" aria-hidden />
         </div>
         <div className="mt-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {stack.map((item) => (
-            <div key={item.title} className="v2-card-on-dark flex gap-3">
-              <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-primary/15 text-primary">
+            <div key={item.title} className="v2-card-on-light flex gap-3">
+              <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px] bg-primary/10 text-primary">
                 <item.icon className="h-4 w-4" />
               </span>
               <div>
@@ -238,7 +240,7 @@ function FullStack() {
 
 function Pitch() {
   return (
-    <section className="v2-elevated border-y border-border py-16 sm:py-20">
+    <section className="bg-black py-16 sm:py-20">
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
         <div>
           <p className="text-sm text-white/90">
@@ -312,7 +314,7 @@ function Services() {
   ];
 
   return (
-    <section id="services" className="bg-black py-16 sm:py-20">
+    <section id="services" className="v2-elevated border-y border-border py-16 sm:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <h2 className="max-w-xl font-heading text-[clamp(2rem,4vw,3.25rem)] text-white">
@@ -420,24 +422,27 @@ function Amc() {
   ];
 
   return (
-    <section className="v2-elevated border-y border-border py-16 sm:py-20">
+    <section className="v2-light py-16 sm:py-20">
       <div className="mx-auto grid max-w-7xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
         <div>
-          <p className="text-sm text-white/90">
-            <span className="text-accent">[</span> Maintenance / AMC{" "}
-            <span className="text-accent">]</span>
+          <p className="text-sm text-[var(--color-light-text)]">
+            <span className="text-primary">[</span> Maintenance / AMC{" "}
+            <span className="text-primary">]</span>
           </p>
-          <h2 className="mt-3 font-heading text-[clamp(2rem,4vw,3rem)] text-white">
+          <h2 className="mt-3 font-heading text-[clamp(2rem,4vw,3rem)] text-[var(--color-light-text)]">
             Don’t go live and get left alone
           </h2>
-          <p className="mt-4 max-w-xl text-sm font-light text-muted sm:text-base">
+          <p className="mt-4 max-w-xl text-sm font-light text-[var(--color-light-muted)] sm:text-base">
             After launch, our AMC plan covers backups, updates, and small edits — so your site
             stays fast, secure, and current without hiring another vendor.
           </p>
           <ul className="mt-6 grid gap-3 sm:grid-cols-2">
             {perks.map((item) => (
-              <li key={item} className="flex items-start gap-2 text-sm text-white/85">
-                <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+              <li
+                key={item}
+                className="flex items-start gap-2 text-sm text-[var(--color-light-text)]"
+              >
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                 {item}
               </li>
             ))}
@@ -450,7 +455,7 @@ function Amc() {
               href={getWhatsAppLink("Hi, I want a maintenance / AMC plan for my website.")}
               target="_blank"
               rel="noopener noreferrer"
-              className="v2-btn v2-btn-ghost px-5 py-3"
+              className="v2-btn v2-btn-dark px-5 py-3"
             >
               Ask about AMC
             </a>
@@ -491,7 +496,7 @@ function Amc() {
 
 function Pricing() {
   return (
-    <section id="pricing" className="relative overflow-hidden bg-black py-16 sm:py-20">
+    <section id="pricing" className="relative overflow-hidden bg-black py-16 text-white sm:py-20">
       <div
         aria-hidden
         className="pointer-events-none absolute left-1/2 top-8 h-40 w-72 -translate-x-1/2 rounded-full bg-white/15 blur-3xl"
@@ -568,7 +573,10 @@ function Pricing() {
 
         <p className="mt-8 text-center text-sm text-muted">
           Need ecommerce, chatbot, or multilingual?{" "}
-          <Link href="/pricing" className="font-normal text-white underline-offset-2 hover:underline">
+          <Link
+            href="/pricing"
+            className="font-normal text-white underline-offset-2 hover:underline"
+          >
             See full pricing
           </Link>
         </p>
@@ -579,7 +587,7 @@ function Pricing() {
 
 function Faq() {
   return (
-    <section id="faq" className="relative overflow-hidden bg-black py-16 sm:py-20">
+    <section id="faq" className="v2-elevated relative overflow-hidden border-y border-border py-16 sm:py-20">
       <div
         aria-hidden
         className="pointer-events-none absolute -left-24 top-1/4 h-72 w-72 rounded-full bg-primary/20 blur-3xl"

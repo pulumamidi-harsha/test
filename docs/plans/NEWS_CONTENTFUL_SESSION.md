@@ -12,7 +12,7 @@
 | Topic | Decision |
 |---|---|
 | Hosting | Bluehost shared (static / build artifacts). No separate Node/VPS for admin **yet**. |
-| **Main site** | **V2** (black / white / violet, Outfit) at `/`. Legacy V1 teal at `/v1` — **not in nav**. |
+| **Main site** | Single homepage at `/` (black / light / violet, Outfit). No `/v1` `/v2` `/v3` routes. |
 | Content write path (now) | **Plan B:** n8n (Render) → Contentful. Humans may also edit in Contentful UI. |
 | Content write path (later) | **Plan A (future):** Nexora custom `/admin` writes content — see § Future Plan A. |
 | Public site read path (now) | Fetch Contentful at **build / deploy time** (or cached CDN read). Fine if content updates after redeploy / webhook rebuild. |

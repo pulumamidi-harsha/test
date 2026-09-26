@@ -19,16 +19,21 @@ export const v2Tokens = {
   radiusCard: 12,
   spacing: [4, 8, 12, 16, 20, 24, 28, 32, 48, 64] as const,
   font: "Outfit",
-  /** Section tone map used on /v2 */
+  /** Homepage section tone map — Work sandwiched by light Process + Pricing */
   rhythm: [
     "dark", // hero
-    "light", // logos / associations
-    "dark", // services (+ light cards)
+    "accent", // stats
+    "light", // full stack
+    "dark", // pitch (black)
+    "elevated", // services (grey)
+    "dark", // industries
     "light", // process
-    "dark", // work
-    "light", // pricing
+    "dark", // work (proof)
+    "dark", // pricing
+    "light", // amc
+    "dark", // reviews
     "dark", // news
     "dark", // faq
-    "dark", // cta
+    "dark", // final cta
   ] as const,
 } as const;
